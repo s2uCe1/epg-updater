@@ -106,6 +106,21 @@ headers = {"User-Agent": "Mozilla/5.0"}
 # Extract all target EPG IDs required by your channel map values
 target_epg_ids = {v.lower() for v in CHANNEL_MAPPING.values()}
 
+# Build reverse mapping: epg_source_id (lower) -> playlist tvg-id
+# TiviMate matches playlist tvg-id against EPG <channel id="...">,
+# so we must rewrite EPG channel IDs to use the playlist's tvg-id.
+epg_to_tvgid = {}
+for playlist_tvg, epg_id in CHANNEL_MAPPING.items():
+    epg_low = epg_id.lower()
+    if epg_low not in epg_to_tvgid:
+        epg_to_tvgid[epg_low] = playlist_tvg
+
+def get_new_channel_id(epg_id_lower):
+    """Map EPG source ID to playlist tvg-id for TiviMate compatibility."""
+    if epg_id_lower in epg_to_tvgid:
+        return epg_to_tvgid[epg_id_lower]
+    return epg_id_lower  # fallback: keep original
+
 channels_dict = {}
 programmes_list = []
 
@@ -125,12 +140,18 @@ for idx, url in enumerate(URLS, 1):
                         cid = elem.get("id")
                         if cid and cid.lower() in target_epg_ids:
                             if cid.lower() not in channels_dict:
+                                # Rewrite channel id to match playlist tvg-id
+                                new_id = get_new_channel_id(cid.lower())
+                                elem.set("id", new_id)
                                 channels_dict[cid.lower()] = ET.tostring(elem, encoding="unicode")
                         elem.clear()
                     elif elem.tag == "programme":
                         ch_ref = elem.get("channel")
                         start = elem.get("start", "")[:14]
                         if ch_ref and ch_ref.lower() in target_epg_ids and (min_time <= start <= max_time):
+                            # Rewrite channel ref to match the new channel id
+                            new_ch = get_new_channel_id(ch_ref.lower())
+                            elem.set("channel", new_ch)
                             for desc in elem.findall("desc"):
                                 elem.remove(desc)
                             programmes_list.append(ET.tostring(elem, encoding="unicode"))
