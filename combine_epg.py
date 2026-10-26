@@ -4,6 +4,7 @@ import time
 import datetime
 import xml.etree.ElementTree as ET
 import requests
+from channel_map import CHANNEL_MAPPING  # Imports your channel map
 
 URLS = [
     "https://www.open-epg.com/files/albania.xml.gz",
@@ -80,12 +81,22 @@ for idx, url in enumerate(URLS, 1):
                 for elem in root:
                     if elem.tag == "channel":
                         cid = elem.get("id")
-                        if cid and cid not in seen_channels:
-                            seen_channels.add(cid)
-                            channels_list.append(elem)
+                        # Read and apply mapped ID from channel_map.py
+                        mapped_cid = CHANNEL_MAPPING.get(cid, cid)
+                        if mapped_cid:
+                            elem.set("id", mapped_cid)
+                            if mapped_cid not in seen_channels:
+                                seen_channels.add(mapped_cid)
+                                channels_list.append(elem)
                     elif elem.tag == "programme":
                         start = elem.get("start", "")[:14]
                         if min_time <= start <= max_time:
+                            ch_ref = elem.get("channel")
+                            # Apply mapped ID to programme channel reference
+                            mapped_ch_ref = CHANNEL_MAPPING.get(ch_ref, ch_ref)
+                            if mapped_ch_ref:
+                                elem.set("channel", mapped_ch_ref)
+
                             for desc in elem.findall("desc"):
                                 elem.remove(desc)
                             programmes_list.append(elem)
