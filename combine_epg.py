@@ -6,14 +6,6 @@ import xml.etree.ElementTree as ET
 import requests
 from channel_map import CHANNEL_MAPPING  # Imports your channel map
 
-import gzip
-import io
-import time
-import datetime
-import xml.etree.ElementTree as ET
-import requests
-from channel_map import CHANNEL_MAPPING  # Imports your channel map
-
 URLS = [
     # Master EPGShare01 All-In-One Feed (Contains all global & regional rippers)
     "https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz",
