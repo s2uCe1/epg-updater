@@ -7,9 +7,7 @@ import requests
 from channel_map import CHANNEL_MAPPING  # Imports your channel map
 
 URLS = [
-    # Master EPGShare01 All-In-One Feed (Contains all global & regional rippers)
     "https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz",
-    # Complete Open-EPG Country & Category Feeds
     "https://www.open-epg.com/files/albania.xml.gz",
     "https://www.open-epg.com/files/argentina.xml.gz",
     "https://www.open-epg.com/files/australia.xml.gz",
@@ -102,18 +100,18 @@ URLS = [
     "https://www.open-epg.com/files/unitedstates11.xml.gz",
 ]
 
-
 OUTPUT_FILE = "combined_epg.xml.gz"
 headers = {"User-Agent": "Mozilla/5.0"}
 
-channels_list = []
-programmes_list = []
-seen_channels = set()
+# Extract all target EPG IDs required by your channel map values
+target_epg_ids = {v.lower() for v in CHANNEL_MAPPING.values()}
 
-# Window: 24h past to 24h future
+channels_dict = {}
+programmes_list = []
+
 now = datetime.datetime.now(datetime.timezone.utc)
 min_time = (now - datetime.timedelta(days=1)).strftime("%Y%m%d%H%M%S")
-max_time = (now + datetime.timedelta(days=1)).strftime("%Y%m%d%H%M%S")
+max_time = (now + datetime.timedelta(days=2)).strftime("%Y%m%d%H%M%S")
 
 for idx, url in enumerate(URLS, 1):
     feed_name = url.split('/')[-1]
@@ -122,112 +120,34 @@ for idx, url in enumerate(URLS, 1):
         res = requests.get(url, headers=headers, timeout=60)
         if res.status_code == 200:
             with gzip.GzipFile(fileobj=io.BytesIO(res.content)) as gz:
-                tree = ET.parse(gz)
-                root = tree.getroot()
-                
-                for elem in root:
+                for event, elem in ET.iterparse(gz, events=("end",)):
                     if elem.tag == "channel":
                         cid = elem.get("id")
-                        # Read and apply mapped ID from channel_map.py
-                        mapped_cid = CHANNEL_MAPPING.get(cid, cid)
-                        if mapped_cid:
-                            elem.set("id", mapped_cid)
-                            if mapped_cid not in seen_channels:
-                                seen_channels.add(mapped_cid)
-                                channels_list.append(elem)
+                        if cid and cid.lower() in target_epg_ids:
+                            if cid.lower() not in channels_dict:
+                                channels_dict[cid.lower()] = ET.tostring(elem, encoding="unicode")
+                        elem.clear()
                     elif elem.tag == "programme":
+                        ch_ref = elem.get("channel")
                         start = elem.get("start", "")[:14]
-                        if min_time <= start <= max_time:
-                            ch_ref = elem.get("channel")
-                            # Apply mapped ID to programme channel reference
-                            mapped_ch_ref = CHANNEL_MAPPING.get(ch_ref, ch_ref)
-                            if mapped_ch_ref:
-                                elem.set("channel", mapped_ch_ref)
-
+                        if ch_ref and ch_ref.lower() in target_epg_ids and (min_time <= start <= max_time):
                             for desc in elem.findall("desc"):
                                 elem.remove(desc)
-                            programmes_list.append(elem)
+                            programmes_list.append(ET.tostring(elem, encoding="unicode"))
+                        elem.clear()
     except Exception as e:
         print(f"Error fetching {feed_name}: {e}")
-    time.sleep(0.3)
+    time.sleep(0.2)
 
-print(f"Channels: {len(channels_list)} | Programmes: {len(programmes_list)}")
+print(f"Matched Channels: {len(channels_dict)} | Programmes: {len(programmes_list)}")
 
-# Build standard XMLTV tree (all channels first, then programmes)
-combined_root = ET.Element("tv")
-
-for ch in channels_list:
-    combined_root.append(ch)
-
-for pr in programmes_list:
-    combined_root.append(pr)
-
-print("Writing file...")
-with gzip.open(OUTPUT_FILE, "wb", compresslevel=9) as f_out:
-    ET.ElementTree(combined_root).write(f_out, encoding="utf-8", xml_declaration=True)
-
-print("Finished successfully.")
-OUTPUT_FILE = "combined_epg.xml.gz"
-headers = {"User-Agent": "Mozilla/5.0"}
-
-channels_list = []
-programmes_list = []
-seen_channels = set()
-
-# Window: 24h past to 24h future
-now = datetime.datetime.now(datetime.timezone.utc)
-min_time = (now - datetime.timedelta(days=1)).strftime("%Y%m%d%H%M%S")
-max_time = (now + datetime.timedelta(days=1)).strftime("%Y%m%d%H%M%S")
-
-for idx, url in enumerate(URLS, 1):
-    feed_name = url.split('/')[-1]
-    print(f"[{idx}/{len(URLS)}] Fetching {feed_name}...")
-    try:
-        res = requests.get(url, headers=headers, timeout=60)
-        if res.status_code == 200:
-            with gzip.GzipFile(fileobj=io.BytesIO(res.content)) as gz:
-                tree = ET.parse(gz)
-                root = tree.getroot()
-                
-                for elem in root:
-                    if elem.tag == "channel":
-                        cid = elem.get("id")
-                        # Read and apply mapped ID from channel_map.py
-                        mapped_cid = CHANNEL_MAPPING.get(cid, cid)
-                        if mapped_cid:
-                            elem.set("id", mapped_cid)
-                            if mapped_cid not in seen_channels:
-                                seen_channels.add(mapped_cid)
-                                channels_list.append(elem)
-                    elif elem.tag == "programme":
-                        start = elem.get("start", "")[:14]
-                        if min_time <= start <= max_time:
-                            ch_ref = elem.get("channel")
-                            # Apply mapped ID to programme channel reference
-                            mapped_ch_ref = CHANNEL_MAPPING.get(ch_ref, ch_ref)
-                            if mapped_ch_ref:
-                                elem.set("channel", mapped_ch_ref)
-
-                            for desc in elem.findall("desc"):
-                                elem.remove(desc)
-                            programmes_list.append(elem)
-    except Exception as e:
-        print(f"Error fetching {feed_name}: {e}")
-    time.sleep(0.3)
-
-print(f"Channels: {len(channels_list)} | Programmes: {len(programmes_list)}")
-
-# Build standard XMLTV tree (all channels first, then programmes)
-combined_root = ET.Element("tv")
-
-for ch in channels_list:
-    combined_root.append(ch)
-
-for pr in programmes_list:
-    combined_root.append(pr)
-
-print("Writing file...")
-with gzip.open(OUTPUT_FILE, "wb", compresslevel=9) as f_out:
-    ET.ElementTree(combined_root).write(f_out, encoding="utf-8", xml_declaration=True)
+print("Writing pruned combined EPG file...")
+with gzip.open(OUTPUT_FILE, "wt", encoding="utf-8") as gz_out:
+    gz_out.write('<?xml version="1.0" encoding="UTF-8"?>\n<tv generator-info-name="epg-combiner">\n')
+    for ch_xml in channels_dict.values():
+        gz_out.write("  " + ch_xml.strip() + "\n")
+    for pr_xml in programmes_list:
+        gz_out.write("  " + pr_xml.strip() + "\n")
+    gz_out.write("</tv>\n")
 
 print("Finished successfully.")
