@@ -146,6 +146,13 @@ for idx, url in enumerate(URLS, 1):
                                 new_id = get_new_channel_id(cid.lower())
                                 elem.set("id", new_id)
                                 
+                                # --- NEW: APPEND ORIGINAL ID TO DISPLAY NAME ---
+                                # This makes manual matching in TiviMate/Smarters much easier
+                                # e.g., changes "HRT 1" to "HRT 1 [HRT1.hr]"
+                                for dn in elem.findall("display-name"):
+                                    if dn.text and cid not in dn.text:
+                                        dn.text = f"{dn.text} [{cid}]"
+                                
                                 # Search for logo match
                                 best_logo = None
                                 search_slugs = epg_to_search_slugs.get(cid.lower(), [])
