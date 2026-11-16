@@ -9,61 +9,142 @@ import requests
 from channel_map import CHANNEL_MAPPING
 
 # =====================================================================
-# 1. EPG SOURCES
+# 1. EPG SOURCES (Open-EPG Primary, EPG Share & EPG LAT Backup)
 # =====================================================================
 URLS = [
-    "https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz",
+    # --- MAIN SOURCE: OPEN-EPG ---
     "https://www.open-epg.com/files/albania.xml.gz",
     "https://www.open-epg.com/files/argentina.xml.gz",
     "https://www.open-epg.com/files/australia.xml.gz",
     "https://www.open-epg.com/files/austria.xml.gz",
+    "https://www.open-epg.com/files/barbados.xml.gz",
     "https://www.open-epg.com/files/belgium.xml.gz",
+    "https://www.open-epg.com/files/bolivia.xml.gz",
     "https://www.open-epg.com/files/bosnia.xml.gz",
     "https://www.open-epg.com/files/brazil.xml.gz",
     "https://www.open-epg.com/files/bulgaria.xml.gz",
-    "https://www.open-epg.com/files/canada1.xml.gz",
-    "https://www.open-epg.com/files/canada2.xml.gz",
+    "https://www.open-epg.com/files/canada.xml.gz",
+    "https://www.open-epg.com/files/chile.xml.gz",
+    "https://www.open-epg.com/files/china.xml.gz",
+    "https://www.open-epg.com/files/colombia.xml.gz",
+    "https://www.open-epg.com/files/costarica.xml.gz",
     "https://www.open-epg.com/files/croatia.xml.gz",
+    "https://www.open-epg.com/files/cyprus.xml.gz",
     "https://www.open-epg.com/files/czech.xml.gz",
     "https://www.open-epg.com/files/denmark.xml.gz",
+    "https://www.open-epg.com/files/dominican.xml.gz",
+    "https://www.open-epg.com/files/ecuador1.xml.gz",
     "https://www.open-epg.com/files/egypt.xml.gz",
+    "https://www.open-epg.com/files/elsalvador.xml.gz",
+    "https://www.open-epg.com/files/estonia.xml.gz",
     "https://www.open-epg.com/files/finland.xml.gz",
     "https://www.open-epg.com/files/france.xml.gz",
+    "https://www.open-epg.com/files/georgia1.xml.gz",
     "https://www.open-epg.com/files/germany.xml.gz",
+    "https://www.open-epg.com/files/ghana1.xml.gz",
     "https://www.open-epg.com/files/greece.xml.gz",
+    "https://www.open-epg.com/files/guatemala.xml.gz",
+    "https://www.open-epg.com/files/honduras.xml.gz",
     "https://www.open-epg.com/files/hungary.xml.gz",
+    "https://www.open-epg.com/files/iceland.xml.gz",
     "https://www.open-epg.com/files/india.xml.gz",
+    "https://www.open-epg.com/files/indonesia.xml.gz",
     "https://www.open-epg.com/files/ireland.xml.gz",
-    "https://www.open-epg.com/files/israel.xml.gz",
     "https://www.open-epg.com/files/italy.xml.gz",
+    "https://www.open-epg.com/files/ivorycoast.xml.gz",
+    "https://www.open-epg.com/files/jamaica.xml.gz",
+    "https://www.open-epg.com/files/japan.xml.gz",
+    "https://www.open-epg.com/files/korea.xml.gz",
     "https://www.open-epg.com/files/latvia.xml.gz",
     "https://www.open-epg.com/files/lithuania.xml.gz",
+    "https://www.open-epg.com/files/macau.xml.gz",
     "https://www.open-epg.com/files/macedonia.xml.gz",
+    "https://www.open-epg.com/files/madagascar.xml.gz",
+    "https://www.open-epg.com/files/malawi.xml.gz",
+    "https://www.open-epg.com/files/malaysia3.xml.gz",
+    "https://www.open-epg.com/files/malta1.xml.gz",
+    "https://www.open-epg.com/files/mauritius.xml.gz",
     "https://www.open-epg.com/files/mexico.xml.gz",
+    "https://www.open-epg.com/files/moldova.xml.gz",
+    "https://www.open-epg.com/files/mongolia.xml.gz",
     "https://www.open-epg.com/files/montenegro.xml.gz",
     "https://www.open-epg.com/files/morocco.xml.gz",
+    "https://www.open-epg.com/files/mozambique.xml.gz",
+    "https://www.open-epg.com/files/namibia.xml.gz",
     "https://www.open-epg.com/files/netherlands.xml.gz",
+    "https://www.open-epg.com/files/newcaledonia.xml.gz",
     "https://www.open-epg.com/files/newzealand.xml.gz",
+    "https://www.open-epg.com/files/nigeria.xml.gz",
     "https://www.open-epg.com/files/norway.xml.gz",
+    "https://www.open-epg.com/files/pakistan.xml.gz",
+    "https://www.open-epg.com/files/palestine.xml.gz",
+    "https://www.open-epg.com/files/panama.xml.gz",
+    "https://www.open-epg.com/files/paraguay1.xml.gz",
+    "https://www.open-epg.com/files/peru.xml.gz",
     "https://www.open-epg.com/files/poland.xml.gz",
     "https://www.open-epg.com/files/portugal.xml.gz",
+    "https://www.open-epg.com/files/puertorico.xml.gz",
     "https://www.open-epg.com/files/qatar.xml.gz",
+    "https://www.open-epg.com/files/reunion.xml.gz",
     "https://www.open-epg.com/files/romania.xml.gz",
     "https://www.open-epg.com/files/russia.xml.gz",
     "https://www.open-epg.com/files/saudiarabia.xml.gz",
-    "https://www.open-epg.com/files/serbia.xml.gz",
+    "https://www.open-epg.com/files/senegal.xml.gz",
+    "https://www.open-epg.com/files/serbia1.xml.gz",
+    "https://www.open-epg.com/files/serbia2.xml.gz",
+    "https://www.open-epg.com/files/serbia4.xml.gz",
+    "https://www.open-epg.com/files/serbia5.xml.gz",
+    "https://www.open-epg.com/files/singapore1.xml.gz",
     "https://www.open-epg.com/files/slovakia.xml.gz",
     "https://www.open-epg.com/files/slovenia.xml.gz",
-    "https://www.open-epg.com/files/southafrica.xml.gz",
+    "https://www.open-epg.com/files/southafrica1.xml.gz",
     "https://www.open-epg.com/files/spain.xml.gz",
-    "https://www.open-epg.com/files/sports.xml.gz",
+    "https://www.open-epg.com/files/sports1.xml.gz",
+    "https://www.open-epg.com/files/sports4.xml.gz",
+    "https://www.open-epg.com/files/sports5.xml.gz",
     "https://www.open-epg.com/files/sweden.xml.gz",
-    "https://www.open-epg.com/files/switzerland.xml.gz",
-    "https://www.open-epg.com/files/turkey.xml.gz",
+    "https://www.open-epg.com/files/switzerland3.xml.gz",
+    "https://www.open-epg.com/files/taiwan1.xml.gz",
+    "https://www.open-epg.com/files/taiwan2.xml.gz",
+    "https://www.open-epg.com/files/tanzania.xml.gz",
+    "https://www.open-epg.com/files/thailand.xml.gz",
+    "https://www.open-epg.com/files/trinidad.xml.gz",
+    "https://www.open-epg.com/files/turkey1.xml.gz",
+    "https://www.open-epg.com/files/turkey2.xml.gz",
+    "https://www.open-epg.com/files/turkey3.xml.gz",
+    "https://www.open-epg.com/files/turkey4.xml.gz",
+    "https://www.open-epg.com/files/turkey5.xml.gz",
     "https://www.open-epg.com/files/uae.xml.gz",
+    "https://www.open-epg.com/files/uganda1.xml.gz",
     "https://www.open-epg.com/files/ukraine.xml.gz",
     "https://www.open-epg.com/files/unitedkingdom.xml.gz",
-    "https://www.open-epg.com/files/unitedstates.xml.gz",
+    "https://www.open-epg.com/files/unitedstates1.xml.gz",
+    "https://www.open-epg.com/files/unitedstates10.xml.gz",
+    "https://www.open-epg.com/files/unitedstates2.xml.gz",
+    "https://www.open-epg.com/files/unitedstates3.xml.gz",
+    "https://www.open-epg.com/files/unitedstates4.xml.gz",
+    "https://www.open-epg.com/files/unitedstates5.xml.gz",
+    "https://www.open-epg.com/files/unitedstates6.xml.gz",
+    "https://www.open-epg.com/files/unitedstates7.xml.gz",
+    "https://www.open-epg.com/files/unitedstates8.xml.gz",
+    "https://www.open-epg.com/files/unitedstates9.xml.gz",
+    "https://www.open-epg.com/files/uruguay.xml.gz",
+    "https://www.open-epg.com/files/uzbekistan.xml.gz",
+    "https://www.open-epg.com/files/venezuela.xml.gz",
+    "https://www.open-epg.com/files/vietnam1.xml.gz",
+    "https://www.open-epg.com/files/zambia.xml.gz",
+    "https://www.open-epg.com/files/zimbabwe.xml.gz",
+    # --- BACKUP 1: EPG SHARE ---
+    "https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz",
+    # --- BACKUP 2: EPG LAT ---
+    "https://epg.lat/files/al.xml.gz",
+    "https://epg.lat/files/dz.xml.gz",
+    "https://epg.lat/files/au.xml.gz",
+    "https://epg.lat/files/ba.xml.gz",
+    "https://epg.lat/files/hr.xml.gz",
+    "https://epg.lat/files/eg.xml.gz",
+    "https://epg.lat/files/sa.xml.gz",
+    "https://epg.lat/files/ae.xml.gz",
 ]
 
 OUTPUT_FILE = "combined_epg.xml.gz"
@@ -79,7 +160,6 @@ for mapped_key, epg_id in CHANNEL_MAPPING.items():
     if epg_low not in epg_to_tvgid:
         epg_to_tvgid[epg_low] = mapped_key
     
-    # Generate a clean text slug from the mapping key to search for logos
     clean_name = re.sub(r'\[.*?\]|\(.*?\)', ' ', mapped_key)
     clean_name = re.sub(r'\b(fhd|uhd|hdr|hevc|4k|8k|sd|hd)\b', ' ', clean_name, flags=re.IGNORECASE)
     slug = re.sub(r'[^a-z0-9]', '', clean_name.lower())
@@ -146,9 +226,7 @@ for idx, url in enumerate(URLS, 1):
                                 new_id = get_new_channel_id(cid.lower())
                                 elem.set("id", new_id)
                                 
-                                # --- NEW: APPEND ORIGINAL ID TO DISPLAY NAME ---
-                                # This makes manual matching in TiviMate/Smarters much easier
-                                # e.g., changes "HRT 1" to "HRT 1 [HRT1.hr]"
+                                # Appending the country code (CID) to the display name for easy manual assignment
                                 for dn in elem.findall("display-name"):
                                     if dn.text and cid not in dn.text:
                                         dn.text = f"{dn.text} [{cid}]"
@@ -192,7 +270,6 @@ for idx, url in enumerate(URLS, 1):
         print(f"Error fetching {feed_name}: {e}")
     time.sleep(0.2)
 
-# Strict Filtering: Only keep channels that registered active programs
 valid_channels = [xml for cid, xml in channels_dict.items() if cid in active_channel_ids]
 
 print(f"Matched Channels with Data: {len(valid_channels)} | Programmes: {len(programmes_list)}")
