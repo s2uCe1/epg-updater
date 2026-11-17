@@ -198,9 +198,6 @@ def fetch_github_logos():
         print(f"[Warning] Failed to fetch logos: {e}")
     return country_logos
 
-def get_new_channel_id(epg_id_lower):
-    return epg_to_tvgid.get(epg_id_lower, epg_id_lower)
-
 channels_dict = {}
 programmes_list = []
 active_channel_ids = set() 
@@ -223,12 +220,22 @@ for idx, url in enumerate(URLS, 1):
                         cid = elem.get("id")
                         if cid and cid.lower() in target_epg_ids:
                             if cid.lower() not in channels_dict:
-                                new_id = get_new_channel_id(cid.lower())
-                                elem.set("id", new_id)
                                 
-                                # Force the XML display-name to perfectly match the M3U channel name for TiviMate auto-matching
+                                # Do NOT alter elem.set("id", ...) so the XML stays valid!
+                                playlist_name = epg_to_tvgid.get(cid.lower())
+                                
+                                # Clear old display-names
                                 for dn in elem.findall("display-name"):
-                                    dn.text = new_id
+                                    elem.remove(dn)
+                                
+                                # Inject EXACT playlist name for TiviMate text-matching
+                                if playlist_name:
+                                    dn_exact = ET.SubElement(elem, "display-name")
+                                    dn_exact.text = playlist_name
+                                
+                                # Keep the original ID as a fallback reference
+                                dn_fallback = ET.SubElement(elem, "display-name")
+                                dn_fallback.text = cid
                                 
                                 # Search for logo match
                                 best_logo = None
@@ -258,8 +265,7 @@ for idx, url in enumerate(URLS, 1):
                         ch_ref = elem.get("channel")
                         start = elem.get("start", "")[:14]
                         if ch_ref and ch_ref.lower() in target_epg_ids and (min_time <= start <= max_time):
-                            new_ch = get_new_channel_id(ch_ref.lower())
-                            elem.set("channel", new_ch)
+                            # Do NOT alter elem.set("channel", ...) so programmes link correctly!
                             for desc in elem.findall("desc"):
                                 elem.remove(desc)
                             programmes_list.append(ET.tostring(elem, encoding="unicode"))
