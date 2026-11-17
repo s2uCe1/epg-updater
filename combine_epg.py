@@ -226,10 +226,9 @@ for idx, url in enumerate(URLS, 1):
                                 new_id = get_new_channel_id(cid.lower())
                                 elem.set("id", new_id)
                                 
-                                # Appending the country code (CID) to the display name for easy manual assignment
+                                # Force the XML display-name to perfectly match the M3U channel name for TiviMate auto-matching
                                 for dn in elem.findall("display-name"):
-                                    if dn.text and cid not in dn.text:
-                                        dn.text = f"{dn.text} [{cid}]"
+                                    dn.text = new_id
                                 
                                 # Search for logo match
                                 best_logo = None
