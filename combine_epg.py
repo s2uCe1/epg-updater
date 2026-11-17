@@ -152,13 +152,18 @@ headers = {"User-Agent": "Mozilla/5.0"}
 
 target_epg_ids = {v.lower() for v in CHANNEL_MAPPING.values()}
 
-epg_to_tvgid = {}
+# BUG FIX: Use lists to store ALL M3U names mapped to a single EPG ID
+epg_to_tvgids = {}
 epg_to_search_slugs = {}
 
 for mapped_key, epg_id in CHANNEL_MAPPING.items():
     epg_low = epg_id.lower()
-    if epg_low not in epg_to_tvgid:
-        epg_to_tvgid[epg_low] = mapped_key
+    if epg_low not in epg_to_tvgids:
+        epg_to_tvgids[epg_low] = []
+    
+    # Store every single variation we find
+    if mapped_key not in epg_to_tvgids[epg_low]:
+        epg_to_tvgids[epg_low].append(mapped_key)
     
     clean_name = re.sub(r'\[.*?\]|\(.*?\)', ' ', mapped_key)
     clean_name = re.sub(r'\b(fhd|uhd|hdr|hevc|4k|8k|sd|hd)\b', ' ', clean_name, flags=re.IGNORECASE)
@@ -221,15 +226,13 @@ for idx, url in enumerate(URLS, 1):
                         if cid and cid.lower() in target_epg_ids:
                             if cid.lower() not in channels_dict:
                                 
-                                # Do NOT alter elem.set("id", ...) so the XML stays valid!
-                                playlist_name = epg_to_tvgid.get(cid.lower())
-                                
                                 # Clear old display-names
                                 for dn in elem.findall("display-name"):
                                     elem.remove(dn)
                                 
-                                # Inject EXACT playlist name for TiviMate text-matching
-                                if playlist_name:
+                                # BUG FIX: Inject a display-name tag for EVERY mapped variation
+                                mapped_names = epg_to_tvgids.get(cid.lower(), [])
+                                for playlist_name in mapped_names:
                                     dn_exact = ET.SubElement(elem, "display-name")
                                     dn_exact.text = playlist_name
                                 
@@ -265,7 +268,6 @@ for idx, url in enumerate(URLS, 1):
                         ch_ref = elem.get("channel")
                         start = elem.get("start", "")[:14]
                         if ch_ref and ch_ref.lower() in target_epg_ids and (min_time <= start <= max_time):
-                            # Do NOT alter elem.set("channel", ...) so programmes link correctly!
                             for desc in elem.findall("desc"):
                                 elem.remove(desc)
                             programmes_list.append(ET.tostring(elem, encoding="unicode"))
@@ -275,7 +277,7 @@ for idx, url in enumerate(URLS, 1):
         print(f"Error fetching {feed_name}: {e}")
     time.sleep(0.2)
 
-valid_channels = [xml for cid, xml in channels_dict.items() if cid in active_channel_ids]
+valid_channels = list(channels_dict.values())
 
 print(f"Matched Channels with Data: {len(valid_channels)} | Programmes: {len(programmes_list)}")
 
