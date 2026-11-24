@@ -9,7 +9,7 @@ import requests
 from channel_map import CHANNEL_MAPPING
 
 # =====================================================================
-# 1. EPG SOURCES (Open-EPG Primary, EPG Share & EPG LAT Backup)
+# 1. EPG SOURCES (Open-EPG Primary, EPG Share)
 # =====================================================================
 URLS = [
     # --- MAIN SOURCE: OPEN-EPG ---
@@ -33,7 +33,7 @@ URLS = [
     "https://www.open-epg.com/files/czech.xml.gz",
     "https://www.open-epg.com/files/denmark.xml.gz",
     "https://www.open-epg.com/files/dominican.xml.gz",
-    "https://www.open-epg.com/files/ecuador1.xml.gz",
+    "https://www.open-epg.com/files/ecuador.xml.gz",
     "https://www.open-epg.com/files/egypt.xml.gz",
     "https://www.open-epg.com/files/elsalvador.xml.gz",
     "https://www.open-epg.com/files/estonia.xml.gz",
@@ -61,8 +61,8 @@ URLS = [
     "https://www.open-epg.com/files/macedonia.xml.gz",
     "https://www.open-epg.com/files/madagascar.xml.gz",
     "https://www.open-epg.com/files/malawi.xml.gz",
-    "https://www.open-epg.com/files/malaysia3.xml.gz",
-    "https://www.open-epg.com/files/malta1.xml.gz",
+    "https://www.open-epg.com/files/malaysia.xml.gz",
+    "https://www.open-epg.com/files/malta.xml.gz",
     "https://www.open-epg.com/files/mauritius.xml.gz",
     "https://www.open-epg.com/files/mexico.xml.gz",
     "https://www.open-epg.com/files/moldova.xml.gz",
@@ -90,11 +90,8 @@ URLS = [
     "https://www.open-epg.com/files/russia.xml.gz",
     "https://www.open-epg.com/files/saudiarabia.xml.gz",
     "https://www.open-epg.com/files/senegal.xml.gz",
-    "https://www.open-epg.com/files/serbia1.xml.gz",
-    "https://www.open-epg.com/files/serbia2.xml.gz",
-    "https://www.open-epg.com/files/serbia4.xml.gz",
-    "https://www.open-epg.com/files/serbia5.xml.gz",
-    "https://www.open-epg.com/files/singapore1.xml.gz",
+    "https://www.open-epg.com/files/serbia.xml.gz",
+    "https://www.open-epg.com/files/singapore.xml.gz",
     "https://www.open-epg.com/files/slovakia.xml.gz",
     "https://www.open-epg.com/files/slovenia.xml.gz",
     "https://www.open-epg.com/files/southafrica1.xml.gz",
@@ -103,19 +100,14 @@ URLS = [
     "https://www.open-epg.com/files/sports4.xml.gz",
     "https://www.open-epg.com/files/sports5.xml.gz",
     "https://www.open-epg.com/files/sweden.xml.gz",
-    "https://www.open-epg.com/files/switzerland3.xml.gz",
-    "https://www.open-epg.com/files/taiwan1.xml.gz",
-    "https://www.open-epg.com/files/taiwan2.xml.gz",
+    "https://www.open-epg.com/files/switzerland.xml.gz",
+    "https://www.open-epg.com/files/taiwan.xml.gz",
     "https://www.open-epg.com/files/tanzania.xml.gz",
     "https://www.open-epg.com/files/thailand.xml.gz",
     "https://www.open-epg.com/files/trinidad.xml.gz",
-    "https://www.open-epg.com/files/turkey1.xml.gz",
-    "https://www.open-epg.com/files/turkey2.xml.gz",
-    "https://www.open-epg.com/files/turkey3.xml.gz",
-    "https://www.open-epg.com/files/turkey4.xml.gz",
-    "https://www.open-epg.com/files/turkey5.xml.gz",
+    "https://www.open-epg.com/files/turkey.xml.gz",
     "https://www.open-epg.com/files/uae.xml.gz",
-    "https://www.open-epg.com/files/uganda1.xml.gz",
+    "https://www.open-epg.com/files/uganda.xml.gz",
     "https://www.open-epg.com/files/ukraine.xml.gz",
     "https://www.open-epg.com/files/unitedkingdom.xml.gz",
     "https://www.open-epg.com/files/unitedstates1.xml.gz",
@@ -136,15 +128,6 @@ URLS = [
     "https://www.open-epg.com/files/zimbabwe.xml.gz",
     # --- BACKUP 1: EPG SHARE ---
     "https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz",
-    # --- BACKUP 2: EPG LAT ---
-    "https://epg.lat/files/al.xml.gz",
-    "https://epg.lat/files/dz.xml.gz",
-    "https://epg.lat/files/au.xml.gz",
-    "https://epg.lat/files/ba.xml.gz",
-    "https://epg.lat/files/hr.xml.gz",
-    "https://epg.lat/files/eg.xml.gz",
-    "https://epg.lat/files/sa.xml.gz",
-    "https://epg.lat/files/ae.xml.gz",
 ]
 
 OUTPUT_FILE = "combined_epg.xml.gz"
