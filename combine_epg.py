@@ -6,6 +6,8 @@ import datetime
 import re
 import xml.etree.ElementTree as ET
 import requests
+
+# Pointing exactly to your standard map file
 from channel_map import CHANNEL_MAPPING
 
 # =====================================================================
@@ -135,7 +137,7 @@ headers = {"User-Agent": "Mozilla/5.0"}
 
 target_epg_ids = {v.lower() for v in CHANNEL_MAPPING.values()}
 
-# BUG FIX: Use lists to store ALL M3U names mapped to a single EPG ID
+# Map exactly how the channels are named in your playlist so the IPTV player can link them
 epg_to_tvgids = {}
 epg_to_search_slugs = {}
 
@@ -144,7 +146,6 @@ for mapped_key, epg_id in CHANNEL_MAPPING.items():
     if epg_low not in epg_to_tvgids:
         epg_to_tvgids[epg_low] = []
     
-    # Store every single variation we find
     if mapped_key not in epg_to_tvgids[epg_low]:
         epg_to_tvgids[epg_low].append(mapped_key)
     
@@ -209,34 +210,38 @@ for idx, url in enumerate(URLS, 1):
                         if cid and cid.lower() in target_epg_ids:
                             if cid.lower() not in channels_dict:
                                 
-                                # Clear old display-names
                                 for dn in elem.findall("display-name"):
                                     elem.remove(dn)
                                 
-                                # BUG FIX: Inject a display-name tag for EVERY mapped variation
                                 mapped_names = epg_to_tvgids.get(cid.lower(), [])
                                 for playlist_name in mapped_names:
                                     dn_exact = ET.SubElement(elem, "display-name")
                                     dn_exact.text = playlist_name
                                 
-                                # Keep the original ID as a fallback reference
                                 dn_fallback = ET.SubElement(elem, "display-name")
                                 dn_fallback.text = cid
                                 
-                                # Search for logo match
+                                # Resolve Logo
                                 best_logo = None
                                 search_slugs = epg_to_search_slugs.get(cid.lower(), [])
                                 for slug in search_slugs:
                                     if not slug: continue
                                     for folder_items in repo_logos.values():
                                         for dl_url, clean_fname in folder_items:
-                                            if slug == clean_fname or slug in clean_fname:
+                                            if slug == clean_fname:
+                                                best_logo = dl_url
+                                                break
+                                            elif slug in clean_fname:
+                                                if re.search(r'\d$', slug):
+                                                    match_idx = clean_fname.find(slug)
+                                                    next_char_idx = match_idx + len(slug)
+                                                    if next_char_idx < len(clean_fname) and clean_fname[next_char_idx].isdigit():
+                                                        continue
                                                 best_logo = dl_url
                                                 break
                                         if best_logo: break
                                     if best_logo: break
 
-                                # Inject logo into XML
                                 if best_logo:
                                     icon_elem = elem.find("icon")
                                     if icon_elem is not None:
